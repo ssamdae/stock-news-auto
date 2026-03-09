@@ -4,5 +4,4 @@ supabase
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-altair<5
-streamlit
+streamlit>=1.30.0
