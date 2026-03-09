@@ -17,8 +17,8 @@ SUPABASE_URL = "https://cbvmxfklgeizoiidibdw.supabase.co"
 SUPABASE_KEY = "sb_publishable_53SDy7w7iKYmEe1G4-yciA_cgqQKO5L"
 
 # 클라우드(GitHub)에서는 환경 변수를, 로컬에서는 위 변수를 사용
-SUPABASE_URL = os.environ.get("SUPABASE_URL", LOCAL_SUPABASE_URL)
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", LOCAL_SUPABASE_KEY)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
