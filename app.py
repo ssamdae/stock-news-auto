@@ -2,8 +2,8 @@ import streamlit as st
 from supabase import create_client, Client
 import pandas as pd
 
-st.set_page_config(page_title="주식 뉴스 대시보드", page_icon="📈", layout="wide")
-st.title("📈 나만의 주식 뉴스 모니터링 대시보드")
+st.set_page_config(page_title="뉴스 대시보드", page_icon="📈", layout="wide")
+st.title("📈 뉴스 DB")
 
 # --- 1. Supabase 연결 설정 ---
 # Streamlit 클라우드의 금고(secrets)에서 URL과 KEY를 가져옵니다.
@@ -19,7 +19,7 @@ supabase = init_connection()
 @st.cache_data(ttl=600) # 10분마다 새로고침 (DB 부하 방지)
 def load_data():
     # Supabase의 news_data 테이블에서 데이터를 가져옵니다. (최신순으로 2000개)
-    response = supabase.table("news_data").select("date, theme, title, content, important_keywords, url").order("date", desc=True).limit(2000).execute()
+    response = supabase.table("news_data").select("date, theme, title, content, important_keywords, url").order("date", desc=True).limit(5000).execute()
     
     # 가져온 데이터를 Pandas 데이터프레임으로 변환
     df = pd.DataFrame(response.data)
