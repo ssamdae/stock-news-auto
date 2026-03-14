@@ -66,18 +66,18 @@ if not selected_themes and not search_keyword:
 else:
     with st.spinner('데이터를 불러오는 중입니다...'):
         try:
-            # 위에서 입력받은 필터 값을 함수에 전달
             df = fetch_filtered_data(start_date, end_date, selected_themes, search_keyword)
             
             if df.empty:
                 st.warning("선택하신 조건에 맞는 뉴스가 없습니다.")
             else:
-                # 출력용 날짜 포맷 변경
                 df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
                 
                 st.subheader(f"총 {len(df)}개의 뉴스가 검색되었습니다.")
+                
+                # 💡 수정된 부분: df[[...]] 리스트에서 'important_keywords'를 삭제했습니다.
                 st.dataframe(
-                    df[['date', 'theme', 'title', 'important_keywords', 'content', 'url']], 
+                    df[['date', 'theme', 'title', 'content', 'url']], 
                     use_container_width=True, 
                     height=800, 
                     hide_index=True,
