@@ -74,8 +74,6 @@ def extract_full_news_data(pdf_path):
     all_data = []
     current_theme = "경제 일반" 
     current_item = None
-    
-    # 이 마커들은 그대로 유지합니다.
     start_marker = "< 경제 일반 >"
     end_marker = "< 기타 >"
     is_target_section = False
@@ -86,38 +84,45 @@ def extract_full_news_data(pdf_path):
         blocks = page.get_text("dict")["blocks"]
         for b in blocks:
             if "lines" not in b: continue
+            
             for l in b["lines"]:
+                # 🌟 [핵심 해결책] Span 쪼개짐 방지를 위해 한 줄의 텍스트를 미리 하나로 합칩니다.
+                full_line_text = "".join([s["text"] for s in l["spans"]]).replace('\xa0', ' ').strip()
+                if not full_line_text: continue
+
+                # 1. 시작 마커 감지 (합친 텍스트로 검사)
+                if start_marker in full_line_text and not is_target_section:
+                    is_target_section = True
+                    current_theme = "경제 일반" 
+                    main_margin_x0 = l["bbox"][0] 
+                    continue
+                    
+                # 2. 종료 마커 감지
+                if end_marker in full_line_text:
+                    if current_item: all_data.append(current_item)
+                    is_target_section = False
+                    break
+                    
+                if not is_target_section: continue
+
+                # 3. 테마(카테고리) 변경 감지 (합친 텍스트로 검사)
+                # 꺾쇠괄호 < > 로 시작하고 끝나는지 검사합니다.
+                theme_match = re.match(r'^\<(.*?)\>$', full_line_text)
+                if theme_match:
+                    if current_item:
+                        all_data.append(current_item)
+                        current_item = None
+                    current_theme = theme_match.group(1).strip()
+                    main_margin_x0 = l["bbox"][0] 
+                    continue
+
+                # 4. 일반 뉴스 데이터 추출 (기존과 동일하게 조각(span) 단위로 위치와 링크 계산)
                 for s in l["spans"]:
                     text = s["text"].strip()
                     if not text: continue
                     x0 = s["bbox"][0]
                     if text in ["관련주", "•"]: continue
                     
-                    # 목표 섹션 시작 감지
-                    if start_marker in text:
-                        is_target_section = True
-                        current_theme = "경제 일반" 
-                        main_margin_x0 = x0 
-                        continue
-                        
-                    # 목표 섹션 종료 감지
-                    if end_marker in text:
-                        if current_item: all_data.append(current_item)
-                        is_target_section = False
-                        break
-                        
-                    if not is_target_section: continue
-
-                    # 🌟 변경된 테마 추출 로직 적용 부분 🌟
-                    new_theme = extract_theme_name(text)
-                    if new_theme:
-                        if current_item:
-                            all_data.append(current_item)
-                            current_item = None
-                        current_theme = new_theme  # 괄호 안의 글자만 깔끔하게 들어감
-                        main_margin_x0 = x0 
-                        continue
-
                     title_rect = fitz.Rect(s["bbox"])
                     link_url = ""
                     for link in page_links:
