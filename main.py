@@ -140,7 +140,7 @@ def save_to_supabase(df):
         if len(res.data) == 0:
             clean_record = {k: ("" if pd.isna(v) else v) for k, v in record.items()}
             supabase.table("news_data").insert(clean_record).execute()
-            inserted_count += insert_count := 1
+            inserted_count += 1
     return inserted_count
 
 # ==========================================
